@@ -7,6 +7,7 @@ import com.liferay.portal.kernel.jsonwebservice.JSONWebService;
 import com.liferay.portal.kernel.jsonwebservice.JSONWebServiceMode;
 import com.liferay.portal.model.Role;
 import com.liferay.portal.model.User;
+import com.liferay.portal.security.ac.AccessControlled;
 import com.liferay.portal.security.auth.PrincipalException;
 import com.liferay.portal.security.permission.PermissionChecker;
 import com.liferay.portal.service.BaseServiceImpl;
@@ -21,13 +22,16 @@ import java.util.Map;
 
 
 @JSONWebService
+@AccessControlled(guestAccessEnabled = true)
 public class WantedServiceImpl extends BaseServiceImpl {
 
+    private TalkBean talkBean;
 
 
 
     WantedServiceImpl(){
-        createClientBean();
+
+        //createClientBean();
     }
 
     private void createClientBean(){
@@ -44,6 +48,7 @@ public class WantedServiceImpl extends BaseServiceImpl {
     // See gere https://docs.liferay.com/portal/6.1/javadocs/index.html?com/liferay/portal/service/package-summary.html
 
     private User getServiveUser(){
+        System.out.println("getServiveUser()");
         try {
             return this.getUser();
         } catch (PortalException e) {
@@ -55,7 +60,9 @@ public class WantedServiceImpl extends BaseServiceImpl {
         }
     }
     @JSONWebService(mode = JSONWebServiceMode.IGNORE)
+    @AccessControlled(guestAccessEnabled = true)
     public List<Role> getUserRoles2() {
+        System.out.println("getUserRoles2");
 
         try {
             try {
@@ -72,6 +79,7 @@ public class WantedServiceImpl extends BaseServiceImpl {
 
     @JSONWebService(mode = JSONWebServiceMode.IGNORE)
     public List<Role> getUserRoles() {
+        System.out.println("getUserRoles");
         try {
             return RoleServiceUtil.getUserRoles(this.getUserId());
         } catch (PortalException e) {
@@ -82,33 +90,41 @@ public class WantedServiceImpl extends BaseServiceImpl {
             return null;        }
     }
 
-    private TalkBean talkBean;
-
-
-
 
     public Map<String, String> sayGoodbye(){
         Map<String, String> m = new HashMap<String, String>();
         String r = "";
-        PermissionChecker checker = null;
+        m.put("Goodbye", "Uli");
+        addUserInfo(m);
+        return m;
+    }
+    public Map<String, String> sayGoodbye2(){
+        Map<String, String> m = new HashMap<String, String>();
+        String r = "";
+        m.put("Goodbye", "Uli");
+        addUserInfo(m);
+        addRolesInfo(m);
+        return m;
+    }
 
+    private void addUserInfo(Map<String, String>m){
+        String r = "";
+        m.put("User", getServiveUser().getFullName());
         try {
-            checker = this.getPermissionChecker();
-        } catch (PrincipalException e) {
+            m.put("Login", getServiveUser().getLogin());
+        } catch (PortalException e) {
+            e.printStackTrace();
+        } catch (SystemException e) {
             e.printStackTrace();
         }
+        return;
+    }
 
-        if(checker != null){
-
-            // Check something
-            m.put("UserId", "" + checker.getUserId());
-        }
-
-        String speech = talkBean.whatToSay();
-        m.put("Goodbye", speech);
-        m.put("User", getServiveUser().getFullName());
+    private void addRolesInfo(Map<String, String>m){
+        String r;
 
         List<Role> roles = getUserRoles();
+
         if( roles != null){
             r = "";
             for(Role role: roles){
@@ -125,6 +141,21 @@ public class WantedServiceImpl extends BaseServiceImpl {
             }
             m.put("Roles2", r);
         }
-        return m;
+        return;
     }
 }
+        /*
+        PermissionChecker checker = null;
+
+        try {
+            checker = this.getPermissionChecker();
+        } catch (PrincipalException e) {
+            e.printStackTrace();
+        }
+
+        if(checker != null){
+
+            // Check something
+            m.put("UserId", "" + checker.getUserId());
+        }
+        */
