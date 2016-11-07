@@ -60,7 +60,6 @@ public class WantedServiceImpl extends BaseServiceImpl {
         }
     }
     @JSONWebService(mode = JSONWebServiceMode.IGNORE)
-    @AccessControlled(guestAccessEnabled = true)
     public List<Role> getUserRoles2() {
         System.out.println("getUserRoles2");
 
@@ -159,3 +158,4 @@ public class WantedServiceImpl extends BaseServiceImpl {
             m.put("UserId", "" + checker.getUserId());
         }
         */
+//    @AccessControlled(guestAccessEnabled = true)
